@@ -13,7 +13,7 @@ fn main() -> Result<(), String> {
         .add(
             Arg::positional("infile").long("infile").help("file to read from").value_kind(ValueKind::Str))?
         .add(
-            Arg::positional("outfile").long("infile").help("file to write to").value_kind(ValueKind::Str))?
+            Arg::positional("outfile").long("outfile").help("file to write to").value_kind(ValueKind::Str))?
         .add(
             Arg::new("cols").short("c").help("bytes per row (default 16)").value_kind(ValueKind::Num).default_value(Value::Num(16)))?
         .add(
