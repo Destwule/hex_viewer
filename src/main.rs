@@ -10,21 +10,21 @@ fn main() -> Result<(), String> {
     let cli_args: Vec<String> = std::env::args().skip(1).collect();
     
     let cli_parser = Parser::new("hex_viewer").help_on_empty(false)
-        .add(
+        .arg(
             Arg::positional("infile").long("infile").help("file to read from").value_kind(ValueKind::Str))?
-        .add(
+        .arg(
             Arg::positional("outfile").long("outfile").help("file to write to").value_kind(ValueKind::Str))?
-        .add(
+        .arg(
             Arg::new("cols").short("c").help("bytes per row (default 16)").value_kind(ValueKind::Num).default_value(Value::Num(16)))?
-        .add(
+        .arg(
             Arg::new("len").long("len").short("l").help("Stop after N bytes").value_kind(ValueKind::Num))?
-        .add(
+        .arg(
             
             Arg::new("seek").long("seek").short("s").help("start at byte offser N").value_kind(ValueKind::Num))?
-        .add(
-            Arg::new("uppercase").long("uppercase").short("u").help("uppercase hex digits").value_kind(ValueKind::Bool).default_value(Value::Bool(false)).takes_value(false))?
-        .add(
-            Arg::new("autoskip").long("autoskip").short("a").help("collapse repeated all-zero rows into '*'").value_kind(ValueKind::Bool).default_value(Value::Bool(false)).takes_value(false))?;
+        .arg(
+            Arg::new("uppercase").long("uppercase").short("u").help("uppercase hex digits").value_kind(ValueKind::Bool).default_value(Value::Bool(false)))?
+        .arg(
+            Arg::new("autoskip").long("autoskip").short("a").help("collapse repeated all-zero rows into '*'").value_kind(ValueKind::Bool).default_value(Value::Bool(false)))?;
     
     let matches = cli_parser.parse(&cli_args)?;
     let mut hex_dump = HexDump::new();

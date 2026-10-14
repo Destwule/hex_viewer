@@ -4,4 +4,4 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-parse_clargs = { path = "../parse_clargs" }
+parse_clargs = "0.1.0"

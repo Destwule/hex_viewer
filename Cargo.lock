@@ -12,3 +12,5 @@ dependencies = [
 [[package]]
 name = "parse_clargs"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d258d2975696c9d908c8372bab86ab267945489797faa060cd03af4734c15f0c"
