@@ -63,10 +63,7 @@ impl HexDump {
     }
 
     fn open_input(&self) -> io::Result<fs::File> {
-            return Ok(fs::OpenOptions::new()
-                .read(true)
-                .open(self.get_input_path())?
-            );
+        Ok(fs::File::open(self.get_input_path())?)
     }
 
     pub fn display_contents(&mut self, handle: &mut Box<dyn Write>, offset_so_far: u64, contents: &[u8]) -> io::Result<()> {        
@@ -111,7 +108,8 @@ impl HexDump {
         
         Ok(())
     }
-
+    
+    
     pub fn run(&mut self) -> io::Result<()> {
         if self.cols == 0 {
             return Err(io::Error::new(
@@ -119,23 +117,50 @@ impl HexDump {
                 "cols must be at least 1",
             ));
         }
-
+        
         
         let mut handle = self.open_output()?;
+        
         if self.get_input_path().is_empty() {
-            let mut buffer = Vec::new();
-            let cols = self.get_cols() as usize ;
+            use std::io::IsTerminal;
             let mut stdin = io::stdin().lock();
+            let interactive = stdin.is_terminal();
+            let cols = self.get_cols() as usize;
+            let mut contents = vec![0u8; cols];
             
             loop {
-                stdin.read_to_end(&mut buffer)?;
-                for (i, chunk) in buffer.chunks(cols).enumerate() {
-                    self.display_contents(&mut handle, (i * cols) as u64, chunk)?;
+                let mut buffer = Vec::new();
+                let got = stdin.read_to_end(&mut buffer)?;
+                
+                if got == 0 {
+                    if interactive { continue; }
+                    std::process::exit(0);
                 }
-                buffer.clear();
+                
+                let mut cursor = io::Cursor::new(buffer);
+                cursor.seek(SeekFrom::Start(self.get_seek()))?;
+
+                let mut total_read = 0u64;
+                loop {
+                    let remaining = match self.get_len() {
+                        Some(limit) => limit.saturating_sub(total_read),
+                        None => self.get_cols(),
+                    };
+                    let want = cmp::min(remaining, self.get_cols()) as usize;
+                    if want == 0 { break; }
+                    
+                    let n = cursor.read(&mut contents[..want])?;
+                    if n == 0 { break; }
+                    
+                    self.display_contents(&mut handle, total_read, &contents[..n])?;
+                    total_read += n as u64;
+                }
+                
+                handle.flush()?;
             }
         }
-
+        
+        
         if Self::has_filename(self.get_input_path()) && Self::has_filename(self.get_output_path()) {
             if let (Ok(a), Ok(b)) = (
                 fs::canonicalize(&self.input_path),
@@ -149,7 +174,7 @@ impl HexDump {
                 }
             }
         }
-
+        
         let mut input_file = self.open_input()?;
         let _ = input_file.seek(SeekFrom::Start(self.get_seek()));
         
