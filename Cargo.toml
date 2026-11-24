@@ -2,6 +2,7 @@
 name = "hex_viewer"
 version = "0.1.0"
 edition = "2024"
+git = "https://github.com/Destwule/hex_viewer"
 
 [dependencies]
 parse_clargs = "0.1.0"
